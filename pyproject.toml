@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "reagentpy"
+version = "0.1.0"
+description = "Python wrapper for the Reagent Analytics API."
+authors = [
+    "Reagent Analytics <developers@reagantanalytics.com>"
+]
+readme = "README.md"
+license = "LICENSE"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+pandas = "^2.2.3"
+click = "^8.1.7"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+reagent = "reagentpy.cli:cli"

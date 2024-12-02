@@ -1,0 +1,6 @@
+.env
+.dev
+.venv
+__pycache__
+*.pyc
+poetry.lock
