@@ -80,7 +80,7 @@ class ReagentClient:
 
         # Set the authorization header
         if not self.reagent_api_key:
-            raise ValueError("Reagnet API key environment variable not set or missing. Try \"reagent login\" to set the API key.")
+            raise ValueError("Reagent API key environment variable not set or missing. Try \"reagent login\" to set the API key.")
         self.session.headers.update({
             "Authorization": f"Basic {self.reagent_api_key}"
         })

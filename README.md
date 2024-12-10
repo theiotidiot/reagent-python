@@ -3,7 +3,7 @@ Python wrapper for the Reagent Analytics API.
 
 ## Installing
 
-Installing from GitHub is possible (public repository only:
+Installing from GitHub is possible (public repository only):
 
 ```
 pip install git+https://github.com/ReagentAnalytics/reagent-python
