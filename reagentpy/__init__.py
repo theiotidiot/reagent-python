@@ -1,3 +1,9 @@
+import os
+
+from dotenv import load_dotenv
+
+from reagentpy.constants import REAGENTPY_USER_AGENT
+
 from reagentpy.clients.community import CommunityClient
 from reagentpy.clients.repo import RepoClient
 from reagentpy.clients.user import UserClient
