@@ -39,7 +39,7 @@ class UserClient(ReagentClient):
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/user/post_patch", params=query_params))
 
 
-    def profile(self, repo: str | None = None, limit: int = 10, email: str | None = None, name: str | None = None,
+    def profile(self, limit: int = 10, email: str | None = None, name: str | None = None,
                       timezone: float | None = None, start_date: str | None = None, end_date: str | None = None):
         """Get contributor profiles for a given user."""
 
