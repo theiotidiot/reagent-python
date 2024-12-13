@@ -28,7 +28,7 @@ pip install reagentpy-<version>-py3-none-any.whl
 You can install the dev build with [`poetry`](https://python-poetry.org/) by navigating to the root of this repo and running the following:
 
 ```
-poetry install
+poetry install --with dev
 ```
 
 **Testing**
