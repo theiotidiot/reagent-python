@@ -51,3 +51,13 @@ class RepoClient(ReagentClient):
         }
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/repo/user_commit_data", params=query_params))
+    
+
+    def hygiene_summary(self, repo: str):
+        """Given a repo, recieve a high-level, hipcheck-style summary of the best open source practices at play."""
+
+        query_param = {
+            "repo": repo
+        }
+
+        return ReagentResponse(self.session.get(f"{self.reagent_base_url}/repo/hygiene_summary", params=query_param))
