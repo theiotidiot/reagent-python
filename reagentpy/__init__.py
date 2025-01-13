@@ -30,8 +30,8 @@ class Reagent:
     def status(self):
         return GenericClient().get("/status")
     
-    def demo_visualization(self) -> DemoVis:
+    def demo_visualizations(self) -> DemoVis:
         return DemoVis()
 
-    def timezone_visualization(self) -> TimezoneVis:
+    def timezone_visualizations(self) -> TimezoneVis:
         return TimezoneVis()
