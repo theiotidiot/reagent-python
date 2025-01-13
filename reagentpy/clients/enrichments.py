@@ -90,3 +90,20 @@ class EnrichmentsClient(ReagentClient):
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/enrichments/threat/score", params=query_params))
     
+    def threat_scores_for_visualizations(self, repo: str | None = None, limit: int = 50):
+        """Given a repo name, get threat scores for visualization purposes."""
+        query_params = {
+            "repo": repo,
+            "limit": limit
+        }
+
+        return ReagentResponse(self.session.get(f"{self.reagent_base_url}/enrichments/visualizations/get_threat_scores", params=query_params))
+    
+    def hibp_for_visualizations(self, repo: str | None = None, limit: int = 50):
+        """Given a repo name, get hibp data for visualization purposes."""
+        query_params = {
+            "repo": repo,
+            "limit": limit
+        }
+
+        return ReagentResponse(self.session.get(f"{self.reagent_base_url}/enrichments/visualizations/get_hibp", params=query_params))

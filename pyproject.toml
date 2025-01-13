@@ -9,17 +9,22 @@ readme = "README.md"
 license = "LICENSE"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.10,<4.0"
 requests = "^2.32.3"
 python-dotenv = "^1.0.1"
 pandas = "^2.2.3"
 click = "^8.1.7"
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
+wordcloud = "^1.9.4"
+geopandas = "^1.0.1"
+ipython = "^8.31.0"
+matplotlib = "^3.10.0"
+cartopy = "^0.24.1"
+numpy = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
+pytest = "^6.2.5"
 
 [build-system]
 requires = ["poetry-core"]

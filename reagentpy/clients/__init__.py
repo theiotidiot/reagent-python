@@ -1,10 +1,7 @@
 import os
 import requests
-
 from dotenv import load_dotenv
-
 import pandas as pd
-
 from reagentpy.constants import VERSION, REAGENTPY_USER_AGENT, REAGENT_BASE_URL
 
 class ReagentResponse:

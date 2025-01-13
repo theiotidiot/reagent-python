@@ -1,15 +1,11 @@
-import os
-
-from dotenv import load_dotenv
-
-from reagentpy.constants import REAGENTPY_USER_AGENT
-
 from reagentpy.clients.community import CommunityClient
 from reagentpy.clients.repo import RepoClient
 from reagentpy.clients.user import UserClient
 from reagentpy.clients.enrichments import EnrichmentsClient
 from reagentpy.clients.commit import CommitClient
 from reagentpy.clients.generic import GenericClient
+from reagentpy.visualizations.demo_visualizations import DemoVis
+from reagentpy.visualizations.timezone_visualizations import TimezoneVis
 
 class Reagent:
 
@@ -33,3 +29,9 @@ class Reagent:
     
     def status(self):
         return GenericClient().get("/status")
+    
+    def demo_visualization(self) -> DemoVis:
+        return DemoVis()
+
+    def timezone_visualization(self) -> TimezoneVis:
+        return TimezoneVis()
