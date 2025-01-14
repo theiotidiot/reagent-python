@@ -231,3 +231,54 @@ def profile(repo, limit, email, name, timezone, start_date, end_date):
     response = client.profile(repo=repo, limit=limit, email=email, name=name, timezone=timezone, start_date=start_date, end_date=end_date)
     click.echo(response.text())
 
+# timezone visualization client
+@cli.group()
+def timezone_visualizations():
+    """Timezone visualization commands."""
+    pass
+
+# show_logarithmic_bar_chart visualization command
+@timezone_visualizations.command()
+@click.option("--response", help="API query response from RepoClient().timezones")
+def show_logarithmic_bar_chart(input_response):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().timezone_visualizations()
+    output_response = client.show_logarithmic_bar_chart(response=input_response)
+    click.echo(output_response.text())
+
+# plot_timezone_distribution visualization command
+@timezone_visualizations.command()
+@click.option("--response", help="API query response from RepoClient().timezones")
+def plot_timezone_distribution(input_response):
+    """Visualize timezones in a bar chart!"""
+    client = Reagent().timezone_visualizations()
+    output_response = client.plot_timezone_distribution(response=input_response)
+    click.echo(output_response.text())
+
+# plot_timezone_distribution_color visualization command
+@timezone_visualizations.command()
+@click.option("--response", help="API query response from RepoClient().timezones")
+def plot_timezone_distribution_color(input_response):
+    """Visualize timezones in a (colored) bar chart!"""
+    client = Reagent().timezone_visualizations()
+    output_response = client.plot_timezone_distribution_color(response=input_response)
+    click.echo(output_response.text())
+
+# get_top_n_timezones visualization command
+@timezone_visualizations.command()
+@click.option("--response", help="API query response from RepoClient().timezones")
+@click.option("--tz-count", default=10, help="Top number of timezones to return, in order")
+def get_top_n_timezones(input_response, tz_count):
+    """List each timezone commits occur in within a given repo, from most to least!"""
+    client = Reagent().timezone_visualizations()
+    output_response = client.get_top_n_timezones(response=input_response, N=tz_count)
+    click.echo(output_response.text())
+
+# build_and_show_timezone_map visualization command
+@timezone_visualizations.command()
+@click.option("--response", help="API query response from RepoClient().timezones")
+def build_and_show_timezone_map(input_response):
+    """List each timezone commits occur in within a given repo, from most to least!"""
+    client = Reagent().timezone_visualizations()
+    output_response = client.build_and_show_timezone_map(response=input_response)
+    click.echo(output_response.text())

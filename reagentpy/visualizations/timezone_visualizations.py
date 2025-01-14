@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 import pandas as pd
-from reagentpy.visualizations import ReagentVis
+from reagentpy.ReagentClient import ReagentClient
 
 
-class TimezoneVis(ReagentVis):
+class TimezoneVisClient(ReagentClient):
     def __init__(self):
         super().__init__()
         # The file that contains timezone boundaries; will be downloaded if needed

@@ -1,4 +1,5 @@
-from reagentpy.clients import ReagentClient, ReagentResponse
+from reagentpy.clients import ReagentResponse
+from reagentpy.ReagentClient import ReagentClient
 
 class CommitClient(ReagentClient):
     def __init__(self):

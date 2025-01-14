@@ -2,10 +2,10 @@ import sys
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from reagentpy.clients.enrichments import EnrichmentsClient
-from reagentpy.visualizations import ReagentVis
+from reagentpy.ReagentClient import ReagentClient
 
 
-class DemoVis(ReagentVis):
+class DemoVisClient(ReagentClient):
     def __init__(self):
         super().__init__()
 
