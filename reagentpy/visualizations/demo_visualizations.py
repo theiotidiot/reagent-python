@@ -13,7 +13,8 @@ class DemoVisClient(ReagentClient):
         return start_string.replace("_", " ").title()
 
 
-    def wordcloud(self, word_freq_dict):
+    def wordcloud(self, response):
+        word_freq_dict = {item.domain: item.instances for item in response}
         wc = WordCloud(
             width=1600,
             height=600,
@@ -28,33 +29,33 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def print_hygiene_summary(self, hyg_response):
+    def print_hygiene_summary(self, response):
         print(
             "\033[1mRepository Overview:\033[0m \033[94m"
-            + hyg_response.repo_name
+            + response.repo_name
             + "\033[0m\n"
-            "\033[1mDescription:\033[0m " + hyg_response.description + "\n"
+            "\033[1mDescription:\033[0m " + response.description + "\n"
             "\033[1mTotal Contributors:\033[0m "
-            + str(hyg_response.total_contributors)
+            + str(response.total_contributors)
             + ", spanning across "
-            + str(hyg_response.total_timezones)
+            + str(response.total_timezones)
             + " timezones, indicating a global contribution pattern.\n"
             "\033[1mFork Count:\033[0m "
-            + str(hyg_response.forks)
+            + str(response.forks)
             + ", showcasing the community engagement and interest.\n"
             "\033[1mLicense Presence:\033[0m "
-            + ("Yes" if hyg_response.has_license else "No")
+            + ("Yes" if response.has_license else "No")
             + ", an important aspect of open source software.\n"
             "\033[1mReadme Presence:\033[0m "
-            + ("Yes" if hyg_response.has_readme else "No")
+            + ("Yes" if response.has_readme else "No")
             + ", vital for repository documentation.\n"
             "\033[1mRecent Commit:\033[0m "
-            + ("Available" if hyg_response.last_activity_at else "Not Available")
+            + ("Available" if response.last_activity_at else "Not Available")
             + ", indicating the current activity status."
         )
 
 
-    def create_out_of_five_chart(self, repo: str | None = None, limit: int = 50):
+    def create_out_of_five_chart(self, repo: str | None = None, limit: int | None = 50):
 
         data = EnrichmentsClient.threat_scores_for_visualizations(repo, limit)
 
@@ -87,7 +88,7 @@ class DemoVisClient(ReagentClient):
             plt.show()
 
 
-    def nationality_pie_chart(self, country_counts, repo_name):
+    def nationality_pie_chart(self, country_counts, repo):
         # Prepare data for the pie chart
         labels = list(country_counts.countries.keys())
         sizes = list(country_counts.countries.values())
@@ -95,14 +96,14 @@ class DemoVisClient(ReagentClient):
         # Plotting the pie chart
         plt.figure(figsize=(10, 7))
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
-        plt.title(f"National Contributions to Repo: {repo_name}")
+        plt.title(f"National Contributions to Repo: {repo}")
         plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
         # Show the pie chart
         plt.show()
 
 
-    def nationality_horizontal_bar_chart(self, country_counts, repo_name):
+    def nationality_horizontal_bar_chart(self, country_counts, repo):
         # Prepare data for the bar chart
         labels = list(country_counts.countries.keys())
         sizes = list(country_counts.countries.values())
@@ -144,16 +145,16 @@ class DemoVisClient(ReagentClient):
         ax.set_xlim(0, 100)
 
         # Adding titles and labels
-        ax.set_title(f"National Contributions to Repo: {repo_name}")
+        ax.set_title(f"National Contributions to Repo: {repo}")
         ax.set_xlabel("Contributions (%)")
 
         # Show the bar chart
         plt.show()
 
 
-    def hibp_pie_chart(self, repo_name: str):
+    def hibp_pie_chart(self, repo: str):
         try:
-            hibp_counts = EnrichmentsClient.hibp_for_visualizations(repo_name)
+            hibp_counts = EnrichmentsClient.hibp_for_visualizations(repo)
 
         except Exception as e:
             print("An error occurred: ", e, file=sys.stderr)
@@ -166,14 +167,14 @@ class DemoVisClient(ReagentClient):
         # Plotting the pie chart
         plt.figure(figsize=(14, 11))
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
-        plt.title(f"Data Breaches in: {repo_name}")
+        plt.title(f"Data Breaches in: {repo}")
         plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
         # Show the pie chart
         plt.show()
 
 
-    def political_chart(self, country_counts, repo_name):
+    def political_chart(self, country_counts, repo):
         # Define the countries that fall under "theirs"
         their_countries = [
             "CN",
@@ -246,14 +247,14 @@ class DemoVisClient(ReagentClient):
         ax.set_xlim(0, 100)
 
         # Adding titles and labels
-        ax.set_title(f"Political Breakdown of Contributions for {repo_name}")
+        ax.set_title(f"Political Breakdown of Contributions for {repo}")
         ax.set_xlabel("Contributions (%)")
 
         # Show the bar chart
         plt.show()
 
 
-    def threat_summary_horizontal_bar_chart(summaries, summary_type, repo_name):
+    def threat_summary_horizontal_bar_chart(self, summaries, summary_type: str, repo):
 
         print("DATA: " + str(summaries))
 
@@ -271,7 +272,7 @@ class DemoVisClient(ReagentClient):
         # Aggregate the scores
         aggregate_scores = {}
         for key, _ in data_dict.items():
-            aggregate_scores[to_title_case(key)] = data_dict[key]
+            aggregate_scores[self.to_title_case(key)] = data_dict[key]
 
         # Prepare data for the bar chart
         labels = list(aggregate_scores.keys())
@@ -327,7 +328,7 @@ class DemoVisClient(ReagentClient):
             ax.set_xlim(0, 100)
 
             # Adding titles and labels
-            ax.set_title(f"Non-Adversarial Threat Metrics for {repo_name}")
+            ax.set_title(f"Non-Adversarial Threat Metrics for {repo}")
         else:
             for i, bar in enumerate(bars):
                 width = bar.get_width()
@@ -345,7 +346,7 @@ class DemoVisClient(ReagentClient):
             ax.set_xlim(0, 100)
 
             # Adding titles and labels
-            ax.set_title(f"Adversarial Commit Percentage for {repo_name} by Threat Type")
+            ax.set_title(f"Adversarial Commit Percentage for {repo} by Threat Type")
 
         # Show the bar chart
         plt.show()

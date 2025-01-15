@@ -157,6 +157,27 @@ def timezones(repo, email, timezone, name):
     response = client.timezones(repo=repo, email=email, timezone=timezone, name=name)
     click.echo(response.text())
 
+# hygiene_summary command
+@repo.command()
+@click.option("--repo", help="The repo name.")
+def hygiene_summary(repo):
+    """Given a repo name, get a high-level summary of its general open-source best practices."""
+    client = Reagent().repo()
+    response = client.hygiene_summary(repo=repo)
+    click.echo(response.text())
+
+# repo_list command
+@repo.command()
+@click.option("--limit", default=10, help="The number of users to return.")
+@click.option("--timezone", help="The timezone.")
+@click.option("--start_date", help="The start date.")
+@click.option("--end_date", help="The end date.")
+def repo_list(limit, timezone, start_date, end_date):
+    """Given a repo name, get a high-level summary of its general open-source best practices."""
+    client = Reagent().repo()
+    response = client.repo_list(limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
+    click.echo(response.text())
+
 # user_commit_data command
 @repo.command()
 @click.option("--repo", help="The repo name.")
@@ -239,46 +260,119 @@ def timezone_visualizations():
 
 # show_logarithmic_bar_chart visualization command
 @timezone_visualizations.command()
-@click.option("--response", help="API query response from RepoClient().timezones")
-def show_logarithmic_bar_chart(input_response):
+@click.option("--api-response", help="API query response from RepoClient().timezones")
+def show_logarithmic_bar_chart(api_response):
     """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
     client = Reagent().timezone_visualizations()
-    output_response = client.show_logarithmic_bar_chart(response=input_response)
-    click.echo(output_response.text())
+    response = client.show_logarithmic_bar_chart(response=api_response)
+    click.echo(response.text())
 
 # plot_timezone_distribution visualization command
 @timezone_visualizations.command()
-@click.option("--response", help="API query response from RepoClient().timezones")
-def plot_timezone_distribution(input_response):
+@click.option("--api-response", help="API query response from RepoClient().timezones")
+def plot_timezone_distribution(api_response):
     """Visualize timezones in a bar chart!"""
     client = Reagent().timezone_visualizations()
-    output_response = client.plot_timezone_distribution(response=input_response)
-    click.echo(output_response.text())
+    response = client.plot_timezone_distribution(response=api_response)
+    click.echo(response.text())
 
 # plot_timezone_distribution_color visualization command
 @timezone_visualizations.command()
-@click.option("--response", help="API query response from RepoClient().timezones")
-def plot_timezone_distribution_color(input_response):
+@click.option("--api-response", help="API query response from RepoClient().timezones")
+def plot_timezone_distribution_color(api_response):
     """Visualize timezones in a (colored) bar chart!"""
     client = Reagent().timezone_visualizations()
-    output_response = client.plot_timezone_distribution_color(response=input_response)
-    click.echo(output_response.text())
+    response = client.plot_timezone_distribution_color(response=api_response)
+    click.echo(response.text())
 
 # get_top_n_timezones visualization command
 @timezone_visualizations.command()
-@click.option("--response", help="API query response from RepoClient().timezones")
+@click.option("--api-response", help="API query response from RepoClient().timezones")
 @click.option("--tz-count", default=10, help="Top number of timezones to return, in order")
-def get_top_n_timezones(input_response, tz_count):
+def get_top_n_timezones(api_response, tz_count):
     """List each timezone commits occur in within a given repo, from most to least!"""
     client = Reagent().timezone_visualizations()
-    output_response = client.get_top_n_timezones(response=input_response, N=tz_count)
-    click.echo(output_response.text())
+    response = client.get_top_n_timezones(response=api_response, N=tz_count)
+    click.echo(response.text())
 
 # build_and_show_timezone_map visualization command
 @timezone_visualizations.command()
-@click.option("--response", help="API query response from RepoClient().timezones")
-def build_and_show_timezone_map(input_response):
+@click.option("--api-response", help="API query response from RepoClient().timezones")
+def build_and_show_timezone_map(api_response):
     """List each timezone commits occur in within a given repo, from most to least!"""
     client = Reagent().timezone_visualizations()
-    output_response = client.build_and_show_timezone_map(response=input_response)
-    click.echo(output_response.text())
+    response = client.build_and_show_timezone_map(response=api_response)
+    click.echo(response.text())
+
+# demo (all other) visualization client
+@cli.group()
+def demo_visualizations():
+    """Generic visualization commands, originally used in demos."""
+    pass
+
+# wordcloud visualization command
+@demo_visualizations.command()
+@click.option("--api-response", help="API query response from RepoClient().email_donains")
+def wordcloud(api_response):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.wordcloud(response=api_response)
+    click.echo(response.text())
+
+# print_hygiene_summary visualization command
+@demo_visualizations.command()
+@click.option("--api-response", help="API query response from RepoClient().email_donains")
+def print_hygiene_summary(api_response):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.print_hygiene_summary(response=api_response)
+    click.echo(response.text())
+
+# create_out_of_five_chart visualization command
+@demo_visualizations.command()
+@click.option("--repo", help="The repo name.")
+@click.option("--limit", default=10, help="The number of commits to return.")
+def create_out_of_five_chart(repo: str | None, limit: int | None):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.create_out_of_five_chart(repo=repo, limit=limit)
+    click.echo(response.text())
+
+# nationality_pie_chart visualization command
+@demo_visualizations.command()
+@click.option("--repo", help="The repo name.")
+@click.option("--country-counts", default=10, help="The number of commits per country.")
+def nationality_pie_chart(country_counts, repo):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.nationality_pie_chart(country_counts, repo)
+    click.echo(response.text())
+
+# nationality_horizontal_bar_chart visualization command
+@demo_visualizations.command()
+@click.option("--repo", help="The repo name.")
+@click.option("--country-counts", default=10, help="The number of commits per country.")
+def nationality_horizontal_bar_chart(country_counts, repo):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.nationality_horizontal_bar_chart(country_counts, repo)
+    click.echo(response.text())
+
+# hibp_pie_chart visualization command
+@demo_visualizations.command()
+@click.option("--repo", help="The repo name.")
+def hibp_pie_chart(repo):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.hibp_pie_chart(repo)
+    click.echo(response.text())
+
+# political_chart visualization command
+@demo_visualizations.command()
+@click.option("--repo", help="The repo name.")
+@click.option("--country-counts", default=10, help="The number of commits per country.")
+def political_chart(country_counts, repo):
+    """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
+    client = Reagent().demo_visualizations()
+    response = client.political_chart(country_counts, repo)
+    click.echo(response.text())

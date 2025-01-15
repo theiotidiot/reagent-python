@@ -62,3 +62,16 @@ class RepoClient(ReagentClient):
         }
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/repo/hygiene_summary", params=query_param))
+    
+
+    def repo_list(self, limit: int = 50, timezone: float | None = None, start_date: str | None = None, end_date: str | None = None):
+        """Get a list of repos and their metadata."""
+
+        query_params = {
+            "limit": limit,
+            "timezone": timezone,
+            "start_date": start_date,
+            "end_date": end_date
+        }
+
+        return ReagentResponse(self.session.get(f"{self.reagent_base_url}/repo/repo_list", params=query_params))
