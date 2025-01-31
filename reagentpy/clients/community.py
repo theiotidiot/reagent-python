@@ -6,8 +6,8 @@ class CommunityClient(ReagentClient):
         super().__init__()
 
     def maintainers(self, repo: str | None = None, limit: int = 10, email: str | None = None,
-                      name: str | None = None, timezone: float | None = None, file: str | None = None, 
-                      hibp: bool | None = None, community: str | None = None):
+                    name: str | None = None, timezone: float | None = None, file: str | None = None, 
+                    hibp: bool | None = None, community: str | None = None):
         """Given a repo or user information, get all the maintainers of mutual file communities."""
 
         query_params = {
