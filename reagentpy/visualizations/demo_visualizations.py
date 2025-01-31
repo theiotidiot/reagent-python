@@ -14,7 +14,10 @@ class DemoVisClient(ReagentClient):
 
 
     def wordcloud(self, response):
-        word_freq_dict = {item.domain: item.instances for item in response}
+        data = response.dict()
+
+        word_freq_dict = {item['domain']: item['instances'] for item in data}
+        
         wc = WordCloud(
             width=1600,
             height=600,
@@ -55,31 +58,27 @@ class DemoVisClient(ReagentClient):
         )
 
 
-    def create_out_of_five_chart(self, repo: str | None = None, limit: int | None = 50):
+    def create_out_of_ten_chart(self, repo: str | None = None):
 
-        data = EnrichmentsClient.threat_scores_for_visualizations(repo, limit)
+        data = EnrichmentsClient().threat_score(repo)
 
-        values = data[0]
+        values = data.dict()[0]
 
         # Create and display charts for each metric
-        for raw_title, score in values:
+        for raw_title in values:
 
-            if score is None:
-                score = 0
-            else:
-                score = score / 2
+            score = values[raw_title]
 
-            title = f"{raw_title.replace('_', ' ').title()}"
+            title = f"{raw_title.replace('_', ' ').title()} out of Ten"
 
-            fig, ax = plt.subplots(figsize=(10, 2))
+            fig, ax = plt.subplots(figsize=(10, 1.5))
 
             ax.barh(y=0, width=10, color="skyblue", align="center")
             # Create the foreground bar (actual score)
             ax.barh(y=0, width=score, color="orange", align="center")
 
-            ax.set_xlim(0, 5)
+            ax.set_xlim(0, 10)
             ax.set_yticks([])
-            ax.set_xlabel("Threat Score out of 5")
             ax.set_title(title)
 
             ax.text(score, 0, f"{score:.2f}", ha="left", va="center")
@@ -254,15 +253,16 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def threat_summary_horizontal_bar_chart(self, summaries, summary_type: str, repo):
+    def threat_summary_horizontal_bar_chart(self, repo: str, adversarial: bool = False):
 
-        print("DATA: " + str(summaries))
+        summaries = EnrichmentsClient().threat_summary(repo, adversarial).dict()[0]
 
-        if summary_type.lower() == "nonadversarial":
-            data_dict = summaries.nonadversarial_totals
+        # print("DATA: " + str(summaries))
 
-        elif summary_type.lower() == "adversarial":
-            data_dict = summaries.adversarial_totals
+        if adversarial:
+            data_dict = summaries["adversarial_totals"][0]
+        elif not adversarial:
+            data_dict = summaries["nonadversarial_totals"][0]
 
         else:
             raise ValueError(
@@ -270,9 +270,13 @@ class DemoVisClient(ReagentClient):
             )
 
         # Aggregate the scores
+        percent_total = 0
         aggregate_scores = {}
         for key, _ in data_dict.items():
             aggregate_scores[self.to_title_case(key)] = data_dict[key]
+            percent_total += data_dict[key]
+            if adversarial:
+                aggregate_scores["Clean Commits"] = 100 - percent_total
 
         # Prepare data for the bar chart
         labels = list(aggregate_scores.keys())
@@ -310,7 +314,7 @@ class DemoVisClient(ReagentClient):
         plt.tight_layout()
         plt.subplots_adjust(bottom=0.3)
 
-        if summary_type.lower() == "nonadversarial":
+        if not adversarial:
             # Add labels inside the bands
             for i, bar in enumerate(bars):
                 width = bar.get_width()

@@ -91,7 +91,7 @@ class EnrichmentsClient(ReagentClient):
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/enrichments/threat/score", params=query_params))
     
-    def threat_scores_for_visualizations(self, repo: str | None = None, limit: int = 50):
+    def threat_scores_for_visualizations(self, repo: str | None = None, limit: int | None = None):
         """Given a repo name, get threat scores for visualization purposes."""
         query_params = {
             "repo": repo,

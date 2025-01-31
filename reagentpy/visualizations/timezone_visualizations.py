@@ -12,56 +12,14 @@ import numpy as np
 import requests
 import pandas as pd
 from reagentpy.ReagentClient import ReagentClient
+from reagentpy.clients.repo import RepoClient
 
 
 class TimezoneVisClient(ReagentClient):
     def __init__(self):
         super().__init__()
         # The file that contains timezone boundaries; will be downloaded if needed
-        self.local_geojson_path = "../combined-now.json"
-
-
-    def download_and_extract_file(self, url, extract_path, output_path):
-        """Download a zip archive and extract a file to a specific location"""
-
-        response = requests.get(url)
-        if response.status_code == 200:
-            # Create a temporary file
-            temp_file = tempfile.NamedTemporaryFile(delete=False)
-            try:
-                # Write the downloaded file to the temporary file
-                with open(temp_file.name, "wb") as f:
-                    f.write(response.content)
-
-                # Open the zip file
-                with zipfile.ZipFile(temp_file.name, "r") as zip_ref:
-                    # Extract the specific file 'results.json'
-                    zip_ref.extract(extract_path, path=tempfile.gettempdir())
-                    extracted_file = os.path.join(tempfile.gettempdir(), extract_path)
-                    shutil.move(extracted_file, output_path)
-                    print(f'"{extract_path}" extracted to "{output_path}"')
-            finally:
-                # Clean up the temporary file
-                os.remove(temp_file.name)
-        else:
-            print(f"Failed to download the file. Status code: {response.status_code}")
-
-
-    def download_if_missing(self, local_path: str, url: str, extract_path: str) -> bool:
-        """Download a file if it isn't found locally"""
-
-        if os.path.exists(local_path):
-            return True
-
-        self.download_and_extract_file(url, extract_path, local_path)
-        return os.path.exists(local_path)
-
-
-    def ensure_timezone_data(self) -> bool:
-        """Make sure we have a local copy of the geojson data"""
-
-        url = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2023d/timezones-now.geojson.zip"
-        return self.download_if_missing(self.local_geojson_path, url, self.local_geojson_path)
+        self.local_geojson_path = "combined-now.json"
 
 
     def get_tz_ids(self, offset: float) -> List[str]:
@@ -719,12 +677,6 @@ class TimezoneVisClient(ReagentClient):
     def read_timezone_geojson(self) -> Optional[dict]:
         """Read the large (~70MB) geojson file into an object in memory"""
 
-        global geojson_data
-
-        # Use cached version if it exists
-        if geojson_data is not None:
-            return geojson_data
-
         geojson_path = "combined-now.json"
 
         print(f"  Reading timezones from {geojson_path}...", end="")
@@ -738,16 +690,10 @@ class TimezoneVisClient(ReagentClient):
         return geojson_data
 
 
-    def plot_timezone_distribution_map(self, timezone_boundaries, response):
+    def plot_timezone_distribution_map(self, timezone_boundaries, timezone_dict_list):
         """Show a map of the world with timezone boundaries colored by commit count"""
 
-        # Get a dictionary for ease of use
-        timezone_commit_data = response.timezone_commit_totals
-        timezone_dict = {
-            entry.timezone: entry.total_commits for entry in timezone_commit_data
-        }
-
-        commit_count = list(timezone_dict.values())
+        commit_count = [d["total_commits"] for d in timezone_dict_list]
 
         # Select the 'cool' colormap for cold-to-hot mapping
         normalized_values = (commit_count - np.min(commit_count)) / (
@@ -770,8 +716,9 @@ class TimezoneVisClient(ReagentClient):
         cbar.set_label("Value")
 
         # Draw shapes for each timezone
-        for i, (tz_offset, commit_count) in enumerate(timezone_dict.items()):
-            tz_names = self.get_tz_ids(tz_offset)
+        for i in range(0, len(timezone_dict_list)):
+            small_dict = timezone_dict_list[i]
+            tz_names = self.get_tz_ids(small_dict["timezone"])
             for tz_name in tz_names:
                 specific_tz = timezone_boundaries[timezone_boundaries["tzid"] == tz_name]
                 color = bar_colors[i]
@@ -790,13 +737,11 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def build_and_show_timezone_map(self, repo_timezones_response):
+    def build_and_show_timezone_map(self, repo_name: str):
         """Pull in all the geojson data and plot the commits onto the map"""
 
-        print("Ensuring local copy of geo data...")
-        if self.ensure_timezone_data() == False:
-            print(f"[!] Failed to download timezone geo data, bailing...")
-            return
+        data = RepoClient().timezones(repo_name)
+        values = data.dict()[0]["timezone_commit_totals"]
 
         print("Reading timezone geo data...")
         timezone_boundaries = self.read_timezone_geojson()
@@ -805,16 +750,20 @@ class TimezoneVisClient(ReagentClient):
             return
 
         print("Plotting timezone map...")
-        self.plot_timezone_distribution_map(timezone_boundaries, repo_timezones_response)
+        self.plot_timezone_distribution_map(timezone_boundaries, values)
 
 
-    def show_logarithmic_bar_chart(self, response):
+    def show_logarithmic_bar_chart(self, repo_name: str):
         """Show a bar chart of commits with log scale"""
+
+        data = RepoClient().timezones(repo_name)
+        values = data.dict()[0]["timezone_commit_totals"]
+
         # Convert to DataFrame
-        data_dicts = [tcc.model_dump() for tcc in response.timezone_commit_totals]
+        # data_dicts = [tcc.model_dump() for tcc in values]
 
         # Create DataFrame
-        df = pd.DataFrame(data_dicts)
+        df = pd.DataFrame(values)
 
         # Sort by timezones
         df = df.sort_values(by="timezone", ascending=True)
@@ -992,20 +941,3 @@ class TimezoneVisClient(ReagentClient):
             output += f"{i+1:-2}. {city_and_offset}: {commit_count}\n"
 
         return output
-
-
-    def show_all_timezone_graphs(self, repo_timezones_response):
-        """Show all standard timezone charts/info for testing or demonstration"""
-
-        # print('show_logarithmic_bar_chart')
-        # show_logarithmic_bar_chart(repo_timezones_response)
-
-        print("plot_timezone_distribution")
-        self.plot_timezone_distribution(repo_timezones_response)
-
-        print("plot_timezone_distribution_color")
-        self.plot_timezone_distribution_color(repo_timezones_response)
-
-        N = 10
-        print(f"top {N} timezones")
-        print(self.get_top_n_timezones(repo_timezones_response, N))
