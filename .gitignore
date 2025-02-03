@@ -1,6 +1,7 @@
 .env
 .dev
 .venv
+.whl
 __pycache__
 *.pyc
 poetry.lock
