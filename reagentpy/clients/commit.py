@@ -1,3 +1,4 @@
+from typing import Optional
 from reagentpy.clients import ReagentResponse
 from reagentpy.ReagentClient import ReagentClient
 
@@ -5,8 +6,8 @@ class CommitClient(ReagentClient):
     def __init__(self):
         super().__init__()
         
-    def data(self, repo: str | None = None, limit: int = 50, email: str | None = None,
-            timezone: float | None = None, start_date: str | None = None, end_date: str | None = None, debug: bool = False):
+    def data(self, repo: Optional[str] = None, limit: int = 50, email: Optional[str] = None,
+            timezone: Optional[float] = None, start_date: Optional[str] = None, end_date: Optional[str] = None, debug: bool = False):
         """Given an email or repo name, get time info on all the commits a user or set of users has committed."""
 
         query_params = {

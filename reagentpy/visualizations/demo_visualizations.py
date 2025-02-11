@@ -1,7 +1,10 @@
 import sys
+from typing import Optional
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from reagentpy.clients.enrichments import EnrichmentsClient
+from reagentpy.clients.repo import RepoClient
+from datetime import datetime, timedelta
 from reagentpy.ReagentClient import ReagentClient
 
 
@@ -11,10 +14,16 @@ class DemoVisClient(ReagentClient):
 
     def to_title_case(self, start_string: str) -> str:
         return start_string.replace("_", " ").title()
+    
+    def within_three_months(self, raw_target_date):
+        target_date = datetime.strptime(raw_target_date, "%Y-%m-%d")
+        current_date = datetime.now()
+        three_months_ago = current_date - timedelta(days=90)
+        return target_date >= three_months_ago
 
 
-    def wordcloud(self, response):
-        data = response.dict()
+    def wordcloud(self, repo_name: Optional[str] = None):
+        data = RepoClient().email_domains(repo_name).dict()
 
         word_freq_dict = {item['domain']: item['instances'] for item in data}
         
@@ -32,37 +41,50 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def print_hygiene_summary(self, response):
-        print(
-            "\033[1mRepository Overview:\033[0m \033[94m"
-            + response.repo_name
-            + "\033[0m\n"
-            "\033[1mDescription:\033[0m " + response.description + "\n"
-            "\033[1mTotal Contributors:\033[0m "
-            + str(response.total_contributors)
+    def print_hygiene_summary(self, repo_name: str):
+        data = RepoClient().hygiene_summary(repo_name).dict()[0]
+
+        name_and_desc = ("\033[1mRepository Overview:\033[0m \033[94m"
+            + repo_name + "\033[0m\n"
+            "\033[1mDescription:\033[0m " + data["description"] + "\n")
+        contribution_pattern = ("\033[1mTotal Contributors:\033[0m "
+            + str(data["total_contributors"])
             + ", spanning across "
-            + str(response.total_timezones)
-            + " timezones, indicating a global contribution pattern.\n"
-            "\033[1mFork Count:\033[0m "
-            + str(response.forks)
-            + ", showcasing the community engagement and interest.\n"
-            "\033[1mLicense Presence:\033[0m "
-            + ("Yes" if response.has_license else "No")
-            + ", an important aspect of open source software.\n"
-            "\033[1mReadme Presence:\033[0m "
-            + ("Yes" if response.has_readme else "No")
-            + ", vital for repository documentation.\n"
-            "\033[1mRecent Commit:\033[0m "
-            + ("Available" if response.last_activity_at else "Not Available")
-            + ", indicating the current activity status."
-        )
+            + str(data["total_timezones"])
+            + " timezones, indicating a "
+            + ("personal project" if data["total_contributors"] == 1 else "") 
+            + ("research" if data["total_contributors"] <= 20 else "")
+            + ("corporate" if data["total_contributors"] > 20 and data["total_timezones"] <= 2 else "")
+            + ("global" if data["total_contributors"] > 20 and data["total_timezones"] > 3 else "")
+            + " contribution pattern.\n")
+        fork_count = ("\033[1mFork Count:\033[0m "
+            + str(data["forks"])
+            + ", showcasing "
+            + ("a lack of" if data["forks"] == 1 else "")
+            + ("a small amount of" if data["forks"] <= 10 else "")
+            + ("a moderate amount of" if data["forks"] <= 100 else "")
+            + ("a significant amount of" if data["forks"] <= 1000 else "")
+            + ("immense" if data["forks"] > 1000 else "")
+            + " community engagement and interest.\n")
+        license_presence = ("\033[1mLicense Presence:\033[0m "
+            + ("Present" if data["has_license"] else "Not Found")
+            + ", an necessary aspect of open source contribution.\n")
+        readme_presence = ("\033[1mReadme Presence:\033[0m "
+            + ("Present" if data["has_readme"] else "Not Found")
+            + ", vital for repository documentation.\n")
+        recent_commit = ("\033[1mRecent Activity:\033[0m "
+            + "The repository was last active on " + str(data["last_activity_at"]) + ", indicating a "
+            + ("active" if self.within_three_months(data["last_activity_at"]) else "stale")
+            + " status.")
+        print(name_and_desc + contribution_pattern + fork_count + license_presence + readme_presence + recent_commit)
 
 
-    def create_out_of_ten_chart(self, repo: str | None = None):
+    def create_out_of_ten_chart(self, repo: Optional[str] = None):
 
-        data = EnrichmentsClient().threat_score(repo)
-
-        values = data.dict()[0]
+        data = EnrichmentsClient().threat_score(repo).dict()
+        if len(data) != 1:
+            raise ValueError("Expected a single dictionary of values, but got multiple.")
+        values = data[0]
 
         # Create and display charts for each metric
         for raw_title in values:
@@ -151,22 +173,27 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def hibp_pie_chart(self, repo: str):
+    def hibp_pie_chart(self, repo: str, include_unbreached: Optional[bool] = False):
         try:
-            hibp_counts = EnrichmentsClient.hibp_for_visualizations(repo)
+            hibp_counts = EnrichmentsClient().hibp_for_visualizations(repo).dict()
 
         except Exception as e:
             print("An error occurred: ", e, file=sys.stderr)
             raise e
 
         # Prepare data for the pie chart
-        labels = list(hibp_counts.keys())
-        sizes = list(hibp_counts.values())
+        labels = []
+        sizes = []
+        for value in hibp_counts:
+            if include_unbreached and (value["hibp_item"] == "Unbreached" or value["hibp_item"] == ""):
+                continue
+            labels.append(value["hibp_item"])
+            sizes.append(value["item_count"])
 
         # Plotting the pie chart
         plt.figure(figsize=(14, 11))
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
-        plt.title(f"Data Breaches in: {repo}")
+        plt.title(f"Data Breaches in: {self.to_title_case(repo)}")
         plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
         # Show the pie chart
@@ -253,104 +280,25 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def threat_summary_horizontal_bar_chart(self, repo: str, adversarial: bool = False):
+    def adversarial_pie_chart(self, repo_name: str):
 
-        summaries = EnrichmentsClient().threat_summary(repo, adversarial).dict()[0]
+        values = EnrichmentsClient().threat_summary(repo_name, adversarial=True).dict()[0]["adversarial_totals"][0]
 
-        # print("DATA: " + str(summaries))
+        # Prepare data for the pie chart
+        labels = []
+        for value in values.keys():
+            labels.append(self.to_title_case(value))
+        sizes = list(values.values())
 
-        if adversarial:
-            data_dict = summaries["adversarial_totals"][0]
-        elif not adversarial:
-            data_dict = summaries["nonadversarial_totals"][0]
+        # Make a "Normal" commits category
+        labels.append("Normal")
+        sizes.append(100 - sum(sizes))
 
-        else:
-            raise ValueError(
-                "Unsupported summary type. Use 'nonadversarial' or 'adversarial'."
-            )
+        # Plotting the pie chart
+        plt.figure(figsize=(14, 11))
+        plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
+        plt.title(f"Adversarial Commit Distribution in {self.to_title_case(repo_name)}")
+        plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
-        # Aggregate the scores
-        percent_total = 0
-        aggregate_scores = {}
-        for key, _ in data_dict.items():
-            aggregate_scores[self.to_title_case(key)] = data_dict[key]
-            percent_total += data_dict[key]
-            if adversarial:
-                aggregate_scores["Clean Commits"] = 100 - percent_total
-
-        # Prepare data for the bar chart
-        labels = list(aggregate_scores.keys())
-        sizes = [aggregate_scores[label] for label in labels]
-
-        # Calculate the cumulative sum of sizes to position the labels
-        total_size = sum(sizes)
-        sizes = [size / total_size * 100 for size in sizes]
-        cumulative_sizes = [sum(sizes[: i + 1]) for i in range(len(sizes))]
-        cumulative_sizes.insert(
-            0, 0
-        )  # Add a zero at the start for the first label position
-
-        # Plotting the bar chart
-        fig, ax = plt.subplots(figsize=(14, 2))
-
-        # Create horizontal bars
-        colors = plt.get_cmap("tab20")(range(len(sizes)))  # Generate distinct colors
-
-        bars = ax.barh(
-            y=0, width=sizes, left=cumulative_sizes[:-1], color=colors, align="center"
-        )
-
-        # Add a legend
-        legend_patches = [plt.Rectangle((0, 0), 1, 1, fc=color) for color in colors]
-        ax.legend(
-            legend_patches,
-            aggregate_scores,
-            loc="upper center",
-            bbox_to_anchor=(0.5, -0.15),
-            ncol=4,
-        )
-
-        # Adjust layout to make room for legend
-        plt.tight_layout()
-        plt.subplots_adjust(bottom=0.3)
-
-        if not adversarial:
-            # Add labels inside the bands
-            for i, bar in enumerate(bars):
-                width = bar.get_width()
-                x_position = bar.get_x() + width / 2
-                ax.text(
-                    x_position,
-                    bar.get_y(),
-                    labels[i] + ": {0:.2f}".format(aggregate_scores[labels[i]]),
-                    ha="center",
-                    va="bottom",
-                    color="white",
-                    fontweight="bold",
-                )
-            ax.set_yticks([])
-            ax.set_xlim(0, 100)
-
-            # Adding titles and labels
-            ax.set_title(f"Non-Adversarial Threat Metrics for {repo}")
-        else:
-            for i, bar in enumerate(bars):
-                width = bar.get_width()
-                x_position = bar.get_x() + width / 2
-                ax.text(
-                    x_position,
-                    bar.get_y(),
-                    "{0:.2f}%".format(aggregate_scores[labels[i]]),
-                    ha="center",
-                    va="bottom",
-                    color="white",
-                    fontweight="bold",
-                )
-            ax.set_yticks([])
-            ax.set_xlim(0, 100)
-
-            # Adding titles and labels
-            ax.set_title(f"Adversarial Commit Percentage for {repo} by Threat Type")
-
-        # Show the bar chart
+        # Show the pie chart
         plt.show()
