@@ -26,6 +26,13 @@ class ReagentResponse:
                 return self.response.json()
     
     def df(self):
+        # Set the maximum column width to None (or you can use -1)
+        pd.set_option("display.max_colwidth", None)
+
+        # Optionally set the maximum number of columns and rows to display
+        pd.set_option("display.max_columns", None)
+        pd.set_option("display.max_rows", None)
+        
         return pd.json_normalize(self.dict())
 
     def json(self):
