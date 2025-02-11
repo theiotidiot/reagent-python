@@ -1,3 +1,4 @@
+from typing import Optional
 import click
 from reagentpy import Reagent
 
@@ -59,22 +60,6 @@ def enrichments():
     """Enrichments related commands."""
     pass
 
-# foreign_influence command
-@enrichments.command()
-@click.option("--entity_name", help="The entity name.")
-@click.option("--limit", default=10, help="The number of entities to return.")
-@click.option("--entity_type", help="The entity type.")
-@click.option("--no_unspecified", help="Whether to exclude unspecified entities.")
-@click.option("--start_date", help="The start date of the entity.")
-@click.option("--end_date", help="The end date of the entity.")
-def foreign_influence(entity_name, limit, entity_type, no_unspecified, start_date, end_date):
-    """Given a repo name, get a snapshot of foreign influence on all commits in the repo."""
-    client = Reagent().enrichments()
-    response = client.foreign_influence(
-        entity_name=entity_name, limit=limit, entity_type=entity_type, no_unspecified=no_unspecified, start_date=start_date, end_date=end_date
-    )
-    click.echo(response.text())
-
 # hibp command
 @enrichments.command()
 @click.option("--repo", help="The repo name.")
@@ -134,15 +119,15 @@ def repo():
 
 # email_domains command
 @repo.command()
-@click.option("--repo", help="The repo name.")
+@click.option("--repo-name", help="The repo name.")
 @click.option("--limit", default=10, help="The number of email domains to return.")
 @click.option("--timezone", help="The timezone.")
 @click.option("--start_date", help="The start date.")
 @click.option("--end_date", help="The end date.")
-def email_domains(repo, limit, timezone, start_date, end_date):
+def email_domains(repo_name, limit, timezone, start_date, end_date):
     """Given a repository, get all the other organizations that contributing users are working in."""
     client = Reagent().repo()
-    response = client.email_domains(repo=repo, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
+    response = client.email_domains(repo_name=repo_name, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
     click.echo(response.text())
 
 # timezones command
@@ -332,7 +317,7 @@ def print_hygiene_summary(api_response):
 @demo_visualizations.command()
 @click.option("--repo", help="The repo name.")
 @click.option("--limit", default=10, help="The number of commits to return.")
-def create_out_of_five_chart(repo: str | None, limit: int | None):
+def create_out_of_five_chart(repo: Optional[str], limit: Optional[int]):
     """Visualize timezones in a bar chart, scaled logarithmically for readability!"""
     client = Reagent().demo_visualizations()
     response = client.create_out_of_five_chart(repo=repo, limit=limit)

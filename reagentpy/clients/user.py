@@ -1,3 +1,4 @@
+from typing import Optional
 from reagentpy.clients import ReagentResponse
 from reagentpy.ReagentClient import ReagentClient
 
@@ -5,9 +6,9 @@ class UserClient(ReagentClient):
     def __init__(self):
         super().__init__()
 
-    def commit_file_community(self, repo: str | None = None, limit: int = 10, email: str | None = None, name: str | None = None,
-                      order_by_date: bool | None = None, format_in_rows: bool | None = None,
-                      timezone: float | None = None, start_date: str | None = None, end_date: str | None = None):
+    def commit_file_community(self, repo: Optional[str] = None, limit: int = 10, email: Optional[str] = None, name: Optional[str] = None,
+                      order_by_date: Optional[bool] = None, format_in_rows: Optional[bool] = None,
+                      timezone: Optional[float] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
         """Get threat scores, repos, and top developers on files."""
 
         query_params = {
@@ -24,8 +25,8 @@ class UserClient(ReagentClient):
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/user/commit_file_community", params=query_params))
 
-    def post_patch(self, repo: str | None = None, limit: int = 10, email: str | None = None,
-                      timezone: float | None = None, start_date: str | None = None, end_date: str | None = None):
+    def post_patch(self, repo: Optional[str] = None, limit: int = 10, email: Optional[str] = None,
+                      timezone: Optional[float] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
         """Get everything a user has done, sorting by most recent suspicious activity and whether their potentially introduced security vulnerabilities have been patched."""
 
         query_params = {
@@ -40,8 +41,8 @@ class UserClient(ReagentClient):
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/user/post_patch", params=query_params))
 
 
-    def profile(self, limit: int = 10, email: str | None = None, name: str | None = None,
-                      timezone: float | None = None, start_date: str | None = None, end_date: str | None = None):
+    def profile(self, limit: int = 10, email: Optional[str] = None, name: Optional[str] = None,
+                      timezone: Optional[float] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
         """Get contributor profiles for a given user."""
 
         query_params = {

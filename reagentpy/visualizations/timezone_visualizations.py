@@ -186,6 +186,7 @@ class TimezoneVisClient(ReagentClient):
                 "US/Eastern",
                 "US/Michigan",
             ],
+            -4.5: ["Error/Timezone"],
             -4.0: [
                 "America/Anguilla",
                 "America/Antigua",
@@ -796,15 +797,16 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def plot_timezone_distribution(self, response):
+    def plot_timezone_distribution(self, repo_name: str):
         """Simple showing distribution across all timezones"""
 
-        timezone_commit_data = response.timezone_commit_totals
+        data = RepoClient().timezones(repo_name)
+        timezone_commit_data = data.dict()[0]["timezone_commit_totals"]
 
         timezone_dict = {t: 0 for t in range(-12, 15)}
         for d in timezone_commit_data:
-            normalized_timezone = d.timezone
-            timezone_dict[normalized_timezone] = d.total_commits
+            normalized_timezone = d["timezone"]
+            timezone_dict[normalized_timezone] = d["total_commits"]
 
         timezones = list(timezone_dict.keys())
         commit_count = list(timezone_dict.values())
@@ -824,15 +826,16 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def plot_timezone_distribution_color(self, response):
+    def plot_timezone_distribution_color(self, repo_name: str):
         """Shows distribution across all timezones, coloring bars based on count"""
 
-        timezone_commit_data = response.timezone_commit_totals
+        data = RepoClient().timezones(repo_name)
+        timezone_commit_data = data.dict()[0]["timezone_commit_totals"]
 
         timezone_dict = {t: 0 for t in range(-12, 15)}
         for d in timezone_commit_data:
-            normalized_timezone = d.timezone
-            timezone_dict[normalized_timezone] = d.total_commits
+            normalized_timezone = d["timezone"]
+            timezone_dict[normalized_timezone] = d["total_commits"]
 
         timezones = list(timezone_dict.keys())
         commit_count = list(timezone_dict.values())
@@ -916,9 +919,10 @@ class TimezoneVisClient(ReagentClient):
             return f"GMT+{offset}"
 
 
-    def get_top_n_timezones(self, response, N=10) -> str:
+    def get_top_n_timezones(self, repo_name: str, N=10) -> str:
 
-        list_of_dicts = response.model_dump()["timezone_commit_totals"]
+        data = RepoClient().timezones(repo_name)
+        list_of_dicts = data.dict()[0]["timezone_commit_totals"]
         sorted_list = sorted(list_of_dicts, key=lambda x: x["total_commits"], reverse=True)
         top_n = sorted_list[:N]
 

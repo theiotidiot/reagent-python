@@ -1,3 +1,4 @@
+from typing import Optional
 from reagentpy.clients import ReagentResponse
 from reagentpy.ReagentClient import ReagentClient
 
@@ -5,9 +6,9 @@ class CommunityClient(ReagentClient):
     def __init__(self):
         super().__init__()
 
-    def maintainers(self, repo: str | None = None, limit: int = 10, email: str | None = None,
-                    name: str | None = None, timezone: float | None = None, file: str | None = None, 
-                    hibp: bool | None = None, community: str | None = None):
+    def maintainers(self, repo: Optional[str] = None, limit: int = 10, email: Optional[str] = None,
+                      name: Optional[str] = None, timezone: Optional[float] = None, file: Optional[str] = None, 
+                      hibp: Optional[bool] = None, community: Optional[str] = None):
         """Given a repo or user information, get all the maintainers of mutual file communities."""
 
         query_params = {
@@ -23,8 +24,8 @@ class CommunityClient(ReagentClient):
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/community/maintainers", params=query_params))
 
-    def communities(self, repo: str | None = None, limit: int = 10, timezone: float | None = None,
-                      start_date: str | None = None, end_date: str | None = None):
+    def communities(self, repo: Optional[str] = None, limit: int = 10, timezone: Optional[float] = None,
+                      start_date: Optional[str] = None, end_date: Optional[str] = None):
         """Get all file communities (usually features) in a repo, given repo information."""
 
         query_params = {
