@@ -25,7 +25,7 @@ class EnrichmentsClient(ReagentClient):
         """Given a repository, get similar organizations and tags common between them."""
 
         query_params = {
-            "repo_name": repo,
+            "repo": repo,
             "email": email,
             "timezone": timezone,
             "start_date": start_date,
@@ -39,7 +39,7 @@ class EnrichmentsClient(ReagentClient):
         """Given a repo name, get all fabricated timezone information."""
 
         query_params = {
-            "repo_name": repo,
+            "repo": repo,
             "limit": limit,
         }
 
@@ -50,7 +50,7 @@ class EnrichmentsClient(ReagentClient):
         """Get topics (categories of code based on commit messages and repository READMEs) by repository or user."""
 
         query_params = {
-            "repo_name": repo,
+            "repo": repo,
             "limit": limit,
             "email": email,
             "name": name,
