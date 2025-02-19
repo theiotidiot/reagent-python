@@ -6,12 +6,12 @@ class RepoClient(ReagentClient):
     def __init__(self):
         super().__init__()
 
-    def email_domains(self, repo_name: Optional[str] = None, limit: int = 10, 
+    def email_domains(self, repo: Optional[str] = None, limit: int = 10, 
                       timezone: Optional[float] = None, start_date: Optional[str] = None, end_date: Optional[str] = None):
         """Given a repository, get all the other organizations that contributing users are working in."""
 
         query_params = {
-            "repo": repo_name,
+            "repo": repo,
             "limit": limit,
             "timezone": timezone,
             "start_date": start_date,

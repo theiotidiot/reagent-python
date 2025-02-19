@@ -22,8 +22,8 @@ class DemoVisClient(ReagentClient):
         return target_date >= three_months_ago
 
 
-    def wordcloud(self, repo_name: Optional[str] = None):
-        data = RepoClient().email_domains(repo_name).dict()
+    def wordcloud(self, repo: Optional[str] = None):
+        data = RepoClient().email_domains(repo).dict()
 
         word_freq_dict = {item['domain']: item['instances'] for item in data}
         
@@ -41,11 +41,11 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def print_hygiene_summary(self, repo_name: str):
-        data = RepoClient().hygiene_summary(repo_name).dict()[0]
+    def print_hygiene_summary(self, repo: str):
+        data = RepoClient().hygiene_summary(repo).dict()[0]
 
         name_and_desc = ("\033[1mRepository Overview:\033[0m \033[94m"
-            + repo_name + "\033[0m\n"
+            + repo + "\033[0m\n"
             "\033[1mDescription:\033[0m " + data["description"] + "\n")
         contribution_pattern = ("\033[1mTotal Contributors:\033[0m "
             + str(data["total_contributors"])
@@ -103,7 +103,10 @@ class DemoVisClient(ReagentClient):
             ax.set_yticks([])
             ax.set_title(title)
 
-            ax.text(score, 0, f"{score:.2f}", ha="left", va="center")
+            if score == 10:
+                ax.text(score, 0, "", ha="left", va="center")
+            else:
+                ax.text(score, 0, f"{score:.2f}", ha="left", va="center")
 
             plt.tight_layout()
             plt.show()
@@ -280,9 +283,9 @@ class DemoVisClient(ReagentClient):
         plt.show()
 
 
-    def adversarial_pie_chart(self, repo_name: str):
+    def adversarial_pie_chart(self, repo: str):
 
-        values = EnrichmentsClient().threat_summary(repo_name, adversarial=True).dict()[0]["adversarial_totals"][0]
+        values = EnrichmentsClient().threat_summary(repo, adversarial=True).dict()[0]["adversarial_totals"][0]
 
         # Prepare data for the pie chart
         labels = []
@@ -297,7 +300,7 @@ class DemoVisClient(ReagentClient):
         # Plotting the pie chart
         plt.figure(figsize=(14, 11))
         plt.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=140)
-        plt.title(f"Adversarial Commit Distribution in {self.to_title_case(repo_name)}")
+        plt.title(f"Adversarial Commit Distribution in {self.to_title_case(repo)}")
         plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
         # Show the pie chart

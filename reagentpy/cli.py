@@ -124,10 +124,10 @@ def repo():
 @click.option("--timezone", help="The timezone.")
 @click.option("--start_date", help="The start date.")
 @click.option("--end_date", help="The end date.")
-def email_domains(repo_name, limit, timezone, start_date, end_date):
+def email_domains(repo, limit, timezone, start_date, end_date):
     """Given a repository, get all the other organizations that contributing users are working in."""
     client = Reagent().repo()
-    response = client.email_domains(repo_name=repo_name, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
+    response = client.email_domains(repo=repo, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
     click.echo(response.text())
 
 # timezones command
