@@ -273,7 +273,7 @@ def plot_timezone_distribution_color(api_response):
 # get_top_n_timezones visualization command
 @timezone_visualizations.command()
 @click.option("--api-response", help="API query response from RepoClient().timezones")
-@click.option("--tz-count", default=10, help="Top number of timezones to return, in order")
+@click.option("--timezone-count", default=10, help="Top number of timezones to return, in order")
 def get_top_n_timezones(api_response, tz_count):
     """List each timezone commits occur in within a given repo, from most to least!"""
     client = Reagent().timezone_visualizations()

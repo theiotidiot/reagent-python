@@ -33,9 +33,9 @@ class UserClient(ReagentClient):
             "repo": repo,
             "limit": limit,
             "email": email,
-            "tz": timezone,
-            "sdate": start_date,
-            "edate": end_date,
+            "timezone": timezone,
+            "start_date": start_date,
+            "end_date": end_date,
         }
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/user/post_patch", params=query_params))
@@ -49,9 +49,9 @@ class UserClient(ReagentClient):
             "limit": limit,
             "email": email,
             "name": name,
-            "tz": timezone,
-            "sdate": start_date,
-            "edate": end_date,
+            "timezone": timezone,
+            "start_date": start_date,
+            "end_date": end_date,
         }
 
         return ReagentResponse(self.session.get(f"{self.reagent_base_url}/user/profile", params=query_params))

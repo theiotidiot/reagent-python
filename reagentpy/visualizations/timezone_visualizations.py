@@ -900,7 +900,7 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def map_timezone_to_city(self, tz: float) -> Optional[str]:
+    def map_timezone_to_city(self, timezone: float) -> Optional[str]:
         """Get ONE city by timezone, returns None if offset not found"""
         tz_to_city = {
             -12.0: ["Etc/GMT+12"],
@@ -944,7 +944,7 @@ class TimezoneVisClient(ReagentClient):
             13.75: ["Pacific/Chatham"],
             14.0: ["Pacific/Kiritimati"],
         }
-        return tz_to_city.get(tz, [None])[0]
+        return tz_to_city.get(timezone, [None])[0]
 
 
     def offset_to_gmt_plus(self, offset: float) -> str:
