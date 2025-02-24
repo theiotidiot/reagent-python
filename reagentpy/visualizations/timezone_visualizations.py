@@ -740,9 +740,9 @@ class TimezoneVisClient(ReagentClient):
                 alpha=0.8
             )
             legend_handles.append(legend_patch)
-            if small_dict["total_commits"] == 1:
-                legend_labels.append(f"{small_dict['timezone']} ({small_dict['total_commits']} commit)")
-            else:
+            if small_dict["total_commits"] > 1:
+            #     legend_labels.append(f"{small_dict['timezone']} ({small_dict['total_commits']} commit)")
+            # else:
                 legend_labels.append(f"{small_dict['timezone']} ({small_dict['total_commits']} commits)")
             
             for tz_name in tz_names:
