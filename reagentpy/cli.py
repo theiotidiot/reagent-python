@@ -124,10 +124,10 @@ def repo():
 @click.option("--timezone", help="The timezone.")
 @click.option("--start_date", help="The start date.")
 @click.option("--end_date", help="The end date.")
-def email_domains(repo_name, limit, timezone, start_date, end_date):
+def email_domains(repo, limit, timezone, start_date, end_date):
     """Given a repository, get all the other organizations that contributing users are working in."""
     client = Reagent().repo()
-    response = client.email_domains(repo_name=repo_name, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
+    response = client.email_domains(repo=repo, limit=limit, timezone=timezone, start_date=start_date, end_date=end_date)
     click.echo(response.text())
 
 # timezones command
@@ -273,7 +273,7 @@ def plot_timezone_distribution_color(api_response):
 # get_top_n_timezones visualization command
 @timezone_visualizations.command()
 @click.option("--api-response", help="API query response from RepoClient().timezones")
-@click.option("--tz-count", default=10, help="Top number of timezones to return, in order")
+@click.option("--timezone-count", default=10, help="Top number of timezones to return, in order")
 def get_top_n_timezones(api_response, tz_count):
     """List each timezone commits occur in within a given repo, from most to least!"""
     client = Reagent().timezone_visualizations()

@@ -680,13 +680,13 @@ class TimezoneVisClient(ReagentClient):
 
         geojson_path = "combined-now.json"
 
-        print(f"  Reading timezones from {geojson_path}...", end="")
+        # print(f"  Reading timezones from {geojson_path}...", end="")
         sys.stdout.flush()
 
         start = time.time()
         geojson_data = gpd.read_file(geojson_path)
         duration = time.time() - start
-        print(f"  Finished in {duration:.2f} seconds.")
+        # print(f"  Finished in {duration:.2f} seconds.")
 
         return geojson_data
 
@@ -694,13 +694,20 @@ class TimezoneVisClient(ReagentClient):
     def plot_timezone_distribution_map(self, timezone_boundaries, timezone_dict_list):
         """Show a map of the world with timezone boundaries colored by commit count"""
 
+        # Sort timezone_dict_list by total_commits in descending order
+        timezone_dict_list = sorted(
+            timezone_dict_list,
+            key=lambda x: x['total_commits'],
+            reverse=True
+        )
+
         commit_count = [d["total_commits"] for d in timezone_dict_list]
 
         # Select the 'cool' colormap for cold-to-hot mapping
         normalized_values = (commit_count - np.min(commit_count)) / (
             np.max(commit_count) - np.min(commit_count)
         )
-        colormap = plt.get_cmap("viridis")
+        colormap = plt.get_cmap("gist_heat_r")
         bar_colors = colormap(normalized_values)
 
         # Set up the plot with Cartopy
@@ -714,12 +721,30 @@ class TimezoneVisClient(ReagentClient):
         )
         sm.set_array([])
         cbar = plt.colorbar(sm, ax=ax)
-        cbar.set_label("Value")
+        cbar.set_label("Number of Commits")
+
+        # Create a list to store legend handles and labels
+        legend_handles = []
+        legend_labels = []
 
         # Draw shapes for each timezone
         for i in range(0, len(timezone_dict_list)):
             small_dict = timezone_dict_list[i]
             tz_names = self.get_tz_ids(small_dict["timezone"])
+            
+            # Create a patch for the legend
+            legend_patch = plt.Rectangle(
+                (0, 0), 1, 1, 
+                facecolor=bar_colors[i], 
+                edgecolor="black", 
+                alpha=0.8
+            )
+            legend_handles.append(legend_patch)
+            if small_dict["total_commits"] == 1:
+                legend_labels.append(f"{small_dict['timezone']} ({small_dict['total_commits']} commit)")
+            else:
+                legend_labels.append(f"{small_dict['timezone']} ({small_dict['total_commits']} commits)")
+            
             for tz_name in tz_names:
                 specific_tz = timezone_boundaries[timezone_boundaries["tzid"] == tz_name]
                 color = bar_colors[i]
@@ -728,40 +753,53 @@ class TimezoneVisClient(ReagentClient):
                     crs=ccrs.PlateCarree(),
                     facecolor=color,
                     edgecolor="black",
-                    alpha=0.5,
+                    alpha=0.8,
                 )
+
+        # Add the legend
+        legend = ax.legend(
+            legend_handles,
+            legend_labels,
+            loc='lower left',
+            # bbox_to_anchor=(1.1, 0.0),
+            title="Timezones",
+            framealpha=1.0,  # Make legend background fully opaque
+            facecolor='white'  # Set legend background color to white
+        )
+        # Make the legend title bold
+        legend.get_title().set_fontweight('bold')
 
         ax.set_global()
         ax.coastlines()
 
-        plt.title(f"Number of Commits by Timezone")
+        plt.title("Number of Commits by Timezone")
+        
+        # Adjust layout to prevent legend from being cut off
+        plt.tight_layout()
         plt.show()
 
 
-    def build_and_show_timezone_map(self, repo_name: str):
+    def build_and_show_timezone_map(self, repo: str):
         """Pull in all the geojson data and plot the commits onto the map"""
 
-        data = RepoClient().timezones(repo_name)
+        data = RepoClient().timezones(repo)
         values = data.dict()[0]["timezone_commit_totals"]
 
-        print("Reading timezone geo data...")
+        # print("Reading timezone geo data...")
         timezone_boundaries = self.read_timezone_geojson()
         if timezone_boundaries is None:
-            print(f"[!] Failed to read timezone geo data, bailing...")
+            # print(f"[!] Failed to read timezone geo data, bailing...")
             return
 
-        print("Plotting timezone map...")
+        # print("Plotting timezone map...")
         self.plot_timezone_distribution_map(timezone_boundaries, values)
 
 
-    def show_logarithmic_bar_chart(self, repo_name: str):
+    def show_logarithmic_bar_chart(self, repo: str):
         """Show a bar chart of commits with log scale"""
 
-        data = RepoClient().timezones(repo_name)
+        data = RepoClient().timezones(repo)
         values = data.dict()[0]["timezone_commit_totals"]
-
-        # Convert to DataFrame
-        # data_dicts = [tcc.model_dump() for tcc in values]
 
         # Create DataFrame
         df = pd.DataFrame(values)
@@ -797,10 +835,10 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def plot_timezone_distribution(self, repo_name: str):
+    def plot_timezone_distribution(self, repo: str):
         """Simple showing distribution across all timezones"""
 
-        data = RepoClient().timezones(repo_name)
+        data = RepoClient().timezones(repo)
         timezone_commit_data = data.dict()[0]["timezone_commit_totals"]
 
         timezone_dict = {t: 0 for t in range(-12, 15)}
@@ -826,10 +864,10 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def plot_timezone_distribution_color(self, repo_name: str):
+    def plot_timezone_distribution_color(self, repo: str):
         """Shows distribution across all timezones, coloring bars based on count"""
 
-        data = RepoClient().timezones(repo_name)
+        data = RepoClient().timezones(repo)
         timezone_commit_data = data.dict()[0]["timezone_commit_totals"]
 
         timezone_dict = {t: 0 for t in range(-12, 15)}
@@ -841,7 +879,7 @@ class TimezoneVisClient(ReagentClient):
         commit_count = list(timezone_dict.values())
 
         # Select a colormap for cold-to-hot mapping
-        colormap = plt.get_cmap("viridis")
+        colormap = plt.get_cmap("gist_heat_r")
         normalized_values = (commit_count - np.min(commit_count)) / (
             np.max(commit_count) - np.min(commit_count)
         )
@@ -862,7 +900,7 @@ class TimezoneVisClient(ReagentClient):
         plt.show()
 
 
-    def map_timezone_to_city(self, tz: float) -> Optional[str]:
+    def map_timezone_to_city(self, timezone: float) -> Optional[str]:
         """Get ONE city by timezone, returns None if offset not found"""
         tz_to_city = {
             -12.0: ["Etc/GMT+12"],
@@ -906,7 +944,7 @@ class TimezoneVisClient(ReagentClient):
             13.75: ["Pacific/Chatham"],
             14.0: ["Pacific/Kiritimati"],
         }
-        return tz_to_city.get(tz, [None])[0]
+        return tz_to_city.get(timezone, [None])[0]
 
 
     def offset_to_gmt_plus(self, offset: float) -> str:
@@ -919,9 +957,9 @@ class TimezoneVisClient(ReagentClient):
             return f"GMT+{offset}"
 
 
-    def get_top_n_timezones(self, repo_name: str, N=10) -> str:
+    def get_top_n_timezones(self, repo: str, N=10) -> str:
 
-        data = RepoClient().timezones(repo_name)
+        data = RepoClient().timezones(repo)
         list_of_dicts = data.dict()[0]["timezone_commit_totals"]
         sorted_list = sorted(list_of_dicts, key=lambda x: x["total_commits"], reverse=True)
         top_n = sorted_list[:N]
