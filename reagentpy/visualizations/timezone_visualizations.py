@@ -13,6 +13,7 @@ import requests
 import pandas as pd
 from reagentpy.ReagentClient import ReagentClient
 from reagentpy.clients.repo import RepoClient
+from reagentpy.clients.composite_scores import CompositeClient
 
 
 class TimezoneVisClient(ReagentClient):
@@ -265,8 +266,6 @@ class TimezoneVisClient(ReagentClient):
                 "America/Santarem",
                 "America/Santiago",
                 "America/Sao_Paulo",
-                "Antarctica/Palmer",
-                "Antarctica/Rothera",
                 "Atlantic/Stanley",
                 "Brazil/East",
                 "Chile/Continental",
@@ -303,7 +302,6 @@ class TimezoneVisClient(ReagentClient):
                 "Africa/Sao_Tome",
                 "Africa/Timbuktu",
                 "America/Danmarkshavn",
-                "Antarctica/Troll",
                 "Atlantic/Canary",
                 "Atlantic/Faeroe",
                 "Atlantic/Faroe",
@@ -452,7 +450,6 @@ class TimezoneVisClient(ReagentClient):
                 "Africa/Kampala",
                 "Africa/Mogadishu",
                 "Africa/Nairobi",
-                "Antarctica/Syowa",
                 "Asia/Aden",
                 "Asia/Amman",
                 "Asia/Baghdad",
@@ -493,8 +490,6 @@ class TimezoneVisClient(ReagentClient):
             ],
             4.5: ["Asia/Kabul"],
             5.0: [
-                "Antarctica/Mawson",
-                "Antarctica/Vostok",
                 "Asia/Almaty",
                 "Asia/Aqtau",
                 "Asia/Aqtobe",
@@ -529,7 +524,6 @@ class TimezoneVisClient(ReagentClient):
             ],
             6.5: ["Asia/Rangoon", "Asia/Yangon", "Indian/Cocos"],
             7.0: [
-                "Antarctica/Davis",
                 "Asia/Bangkok",
                 "Asia/Barnaul",
                 "Asia/Ho_Chi_Minh",
@@ -547,7 +541,6 @@ class TimezoneVisClient(ReagentClient):
                 "Indian/Christmas",
             ],
             8.0: [
-                "Antarctica/Casey",
                 "Asia/Brunei",
                 "Asia/Choibalsan",
                 "Asia/Chongqing",
@@ -592,7 +585,6 @@ class TimezoneVisClient(ReagentClient):
             ],
             9.5: ["Australia/Darwin", "Australia/North"],
             10.0: [
-                "Antarctica/DumontDUrville",
                 "Asia/Ust-Nera",
                 "Asia/Vladivostok",
                 "Australia/Brisbane",
@@ -613,7 +605,6 @@ class TimezoneVisClient(ReagentClient):
                 "Australia/Yancowinna",
             ],
             11.0: [
-                "Antarctica/Macquarie",
                 "Asia/Magadan",
                 "Asia/Sakhalin",
                 "Asia/Srednekolymsk",
@@ -653,8 +644,6 @@ class TimezoneVisClient(ReagentClient):
                 "Pacific/Wallis",
             ],
             13.0: [
-                "Antarctica/McMurdo",
-                "Antarctica/South_Pole",
                 "Etc/GMT-13",
                 "NZ",
                 "Pacific/Apia",
@@ -683,9 +672,11 @@ class TimezoneVisClient(ReagentClient):
         # print(f"  Reading timezones from {geojson_path}...", end="")
         sys.stdout.flush()
 
-        start = time.time()
+        # start = time.time()
         geojson_data = gpd.read_file(geojson_path)
-        duration = time.time() - start
+        bounds = geojson_data.crs.area_of_use.bounds
+        print(f"bounds: {str(bounds)}")
+        # duration = time.time() - start
         # print(f"  Finished in {duration:.2f} seconds.")
 
         return geojson_data

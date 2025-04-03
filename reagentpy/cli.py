@@ -361,3 +361,57 @@ def political_chart(country_counts, repo):
     client = Reagent().demo_visualizations()
     response = client.political_chart(country_counts, repo)
     click.echo(response.text())
+
+# composite scores client
+@cli.group()
+def composite_scores():
+    """Composite scores commands."""
+    pass
+
+# nonadversarial_components
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def nonadversarial_components(repo):
+    client = Reagent().composite_scores()
+    response = client.nonadversarial_components(repo=repo)
+    click.echo(response.text())
+ 
+# nonadversarial_total
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def nonadversarial_total(repo):
+    client = Reagent().composite_scores()
+    response = client.nonadversarial_total(repo=repo)
+    click.echo(response.text())
+
+# nonadversarial_timezones
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def nonadversarial_timezones(repo):
+    client = Reagent().composite_scores()
+    response = client.nonadversarial_timezones(repo=repo)
+    click.echo(response.text())
+
+# adversarial_components
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def adversarial_timezones(repo):
+    client = Reagent().composite_scores()
+    response = client.adversarial_components(repo=repo)
+    click.echo(response.text())
+
+# adversarial_timezones
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def adversarial_timezones(repo):
+    client = Reagent().composite_scores()
+    response = client.adversarial_timezones(repo=repo)
+    click.echo(response.text())
+
+# adversarial_total
+@composite_scores.command()
+@click.option("--repo", help="The repo name.")
+def adversarial_total(repo):
+    client = Reagent().composite_scores()
+    response = client.adversarial_total(repo=repo)
+    click.echo(response.text())

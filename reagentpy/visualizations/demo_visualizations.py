@@ -3,6 +3,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from reagentpy.clients.enrichments import EnrichmentsClient
+from reagentpy.clients.composite_scores import CompositeClient
 from reagentpy.clients.repo import RepoClient
 from datetime import datetime, timedelta
 from reagentpy.ReagentClient import ReagentClient
