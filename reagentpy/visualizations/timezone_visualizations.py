@@ -1,15 +1,9 @@
-import os
-import shutil
 import sys
-import tempfile
-import time
-import zipfile
 from typing import Dict, List, Optional
 import cartopy.crs as ccrs
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
-import requests
 import pandas as pd
 from reagentpy.ReagentClient import ReagentClient
 from reagentpy.clients.repo import RepoClient
@@ -675,7 +669,7 @@ class TimezoneVisClient(ReagentClient):
         # start = time.time()
         geojson_data = gpd.read_file(geojson_path)
         bounds = geojson_data.crs.area_of_use.bounds
-        print(f"bounds: {str(bounds)}")
+        # print(f"bounds: {str(bounds)}")
         # duration = time.time() - start
         # print(f"  Finished in {duration:.2f} seconds.")
 
@@ -695,6 +689,7 @@ class TimezoneVisClient(ReagentClient):
         commit_count = [d["total_commits"] for d in timezone_dict_list]
 
         # Select the 'cool' colormap for cold-to-hot mapping
+        denominator = np.max(commit_count) - np.min(commit_count)
         normalized_values = (commit_count - np.min(commit_count)) / (
             np.max(commit_count) - np.min(commit_count)
         )

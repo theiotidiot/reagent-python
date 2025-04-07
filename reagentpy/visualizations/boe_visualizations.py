@@ -11,9 +11,45 @@ class BOEVisClient(ReagentClient):
     def __init__(self):
         super().__init__()
         self.colormap = plt.get_cmap("RdYlGn")
+
+
+    def total_chart(self, repo: str, adversarial: Optional[bool] =True):
+
+        if adversarial:
+            data = CompositeClient().adversarial_total(repo).dict()
+            title = "Foreign Adversarial Score out of 100%"
+            score = data[0]["foreign_adversarial_score"]
+        else:
+            data = CompositeClient().nonadversarial_total(repo).dict()
+            title = "Metadata Risk Score out of 100%"
+            score = data[0]["metadata_risk_score"]
+        if len(data) != 1:
+            raise ValueError("Expected a single dictionary of values, but got multiple.")
+
+        _, ax = plt.subplots(figsize=(10, 1.5))
+
+        # colormap
+        colormap = self.colormap
+        normalized_values = (score)
+        bar_colors = colormap(normalized_values)
+
+        # Create the foreground bar (actual score)
+        ax.barh(y=0, width=score, color=bar_colors, align="center")
+
+        ax.set_xlim(0, 100)
+        ax.set_yticks([])
+        ax.set_title(title)
+
+        if score == 100:
+            ax.text(score, 0, "%", ha="left", va="center")
+        else:
+            ax.text(score, 0, f"{score:.2f}%", ha="left", va="center")
+
+        plt.tight_layout()
+        plt.show()
         
 
-    def create_percent_chart(self, repo: Optional[str] = None):
+    def create_percent_chart(self, repo: str):
 
         data = CompositeClient().nonadversarial_components(repo).dict()
         if len(data) != 1:
@@ -27,7 +63,7 @@ class BOEVisClient(ReagentClient):
 
             title = f"{raw_title.replace('_', ' ').title()} out of 100%"
 
-            fig, ax = plt.subplots(figsize=(10, 1.5))
+            _, ax = plt.subplots(figsize=(10, 1.5))
 
             # colormap
             colormap = self.colormap
