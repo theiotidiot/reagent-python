@@ -168,38 +168,56 @@ class BOEVisClient(ReagentClient):
 
 
     def plot_adversarial_percent_timezone_color(self, repo: str):
-        """Shows distribution across all timezones, coloring bars based on count"""
-
+#         """Shows distribution across all timezones, coloring bars based on count"""
+# 
+#         data = CompositeClient().adversarial_timezones(repo)
+#         timezone_commit_data = data.dict()
+# 
+#         timezone_dict = {}
+#         for d in timezone_commit_data:
+#             normalized_timezone = str(d["timezone"]) + ", " + str(d["major_city"])
+#             timezone_dict[normalized_timezone] = d["percent_of_total_commits"]
+# 
+#         timezones = list(timezone_dict.keys())
+#         commit_count = list(timezone_dict.values())
+# 
+#         # Select a colormap for cold-to-hot mapping
+#         colormap = self.colormap
+#         normalized_values = (commit_count - np.min(commit_count)) / (
+#             np.max(commit_count) - np.min(commit_count)
+#         )
+#         bar_colors = colormap(normalized_values)
+# 
+#         # Plotting
+#         plt.figure(figsize=(10, 6))
+#         plt.bar(timezones, commit_count, color=bar_colors, width=0.5, zorder=3)
+# 
+#         plt.xticks(range(len(timezones)))
+#         plt.xlabel("Time Zone (UTC Offset), Major City")
+#         plt.ylabel("Percent of Total Commits")
+#         plt.title("Commit Distribution Across Time Zones")
+# 
+#         plt.grid(axis="y", zorder=0)
+#         plt.gca().set_axisbelow(True)
+#         plt.tight_layout()
+#         plt.show()
+        # Prepare data for the pie chart
         data = CompositeClient().adversarial_timezones(repo)
         timezone_commit_data = data.dict()
+        labels = [tz["country"] + ": " + tz["major_city"] if tz["major_city"] != "Non-Adversarial" else "Non-Adversarial" for tz in list(timezone_commit_data)]
+        sizes = [tz["percent_of_total_commits"] for tz in list(timezone_commit_data)]
 
-        timezone_dict = {}
-        for d in timezone_commit_data:
-            normalized_timezone = str(d["timezone"]) + ", " + str(d["major_city"])
-            timezone_dict[normalized_timezone] = d["percent_of_total_commits"]
-
-        timezones = list(timezone_dict.keys())
-        commit_count = list(timezone_dict.values())
-
-        # Select a colormap for cold-to-hot mapping
         colormap = self.colormap
-        normalized_values = (commit_count - np.min(commit_count)) / (
-            np.max(commit_count) - np.min(commit_count)
-        )
-        bar_colors = colormap(normalized_values)
+        normalized_values = [size / 100 for size in sizes]
+        slice_colors = colormap(normalized_values)
 
-        # Plotting
-        plt.figure(figsize=(10, 6))
-        plt.bar(timezones, commit_count, color=bar_colors, width=0.5, zorder=3)
+        # Plotting the pie chart
+        plt.figure(figsize=(10, 7))
+        plt.pie(sizes, labels=labels, colors=slice_colors, autopct="%1.1f%%", rotatelabels =True, startangle=180, textprops = dict(va="center", rotation_mode = 'anchor'))
+        # plt.title(f"Foreign Adversarial Influence by Percentage: {repo}")
+        plt.axis("equal")  # Equal aspect ratio ensures that pie chart is drawn as a circle.
 
-        plt.xticks(range(len(timezones)))
-        plt.xlabel("Time Zone (UTC Offset), Major City")
-        plt.ylabel("Percent of Total Commits")
-        plt.title("Commit Distribution Across Time Zones")
-
-        plt.grid(axis="y", zorder=0)
-        plt.gca().set_axisbelow(True)
-        plt.tight_layout()
+        # Show the pie chart
         plt.show()
 
     
