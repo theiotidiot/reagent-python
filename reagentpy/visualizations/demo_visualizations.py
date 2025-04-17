@@ -3,6 +3,7 @@ from typing import Optional
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from reagentpy.clients.enrichments import EnrichmentsClient
+from reagentpy.clients.composite_scores import CompositeClient
 from reagentpy.clients.repo import RepoClient
 from datetime import datetime, timedelta
 from reagentpy.ReagentClient import ReagentClient
@@ -68,13 +69,13 @@ class DemoVisClient(ReagentClient):
             + " community engagement and interest.\n")
         license_presence = ("\033[1mLicense Presence:\033[0m "
             + ("Present" if data["has_license"] else "Not Found")
-            + ", an necessary aspect of open source contribution.\n")
+            + ", a necessary aspect of open source contribution.\n")
         readme_presence = ("\033[1mReadme Presence:\033[0m "
             + ("Present" if data["has_readme"] else "Not Found")
             + ", vital for repository documentation.\n")
         recent_commit = ("\033[1mRecent Activity:\033[0m "
-            + "The repository was last active on " + str(data["last_activity_at"]) + ", indicating a "
-            + ("active" if self.within_three_months(data["last_activity_at"]) else "stale")
+            + "The repository was last active on " + str(data["last_activity_at"]) + ", indicating a"
+            + ("n active" if self.within_three_months(data["last_activity_at"]) else " stale")
             + " status.")
         print(name_and_desc + contribution_pattern + fork_count + license_presence + readme_presence + recent_commit)
 
