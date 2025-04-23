@@ -1,8 +1,7 @@
 # FILE: test_reagent.py
 import os
 import pytest
-import requests
-from reagentpy.clients import ReagentClient
+from reagentpy.ReagentClient import ReagentClient
 from unittest.mock import patch, MagicMock
 from dotenv import load_dotenv
 
@@ -46,6 +45,7 @@ def test_reagent(mock_session):
     response = client.session.request("GET", f"{client.reagent_base_url}/status", params=None)
     assert response.json() == {'status': 'ok'}
     mock_session_instance.request.assert_called_once_with('GET', 'https://api.reagentanalytics.com/v1/status', params=None)
+
 
 if __name__ == "__main__":
     pytest.main()
