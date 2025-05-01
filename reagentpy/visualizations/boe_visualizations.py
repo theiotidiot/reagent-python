@@ -18,7 +18,7 @@ class BOEVisClient(ReagentClient):
         if adversarial:
             data = CompositeClient().adversarial_total(repo).dict()
             title = "Foreign Adversarial Score out of 100%"
-            score = data[0]["foreign_adversarial_score"]
+            score = data[0]["foreign_adversarial_influence_score"]
         else:
             data = CompositeClient().nonadversarial_total(repo).dict()
             title = "Metadata Risk Score out of 100%"

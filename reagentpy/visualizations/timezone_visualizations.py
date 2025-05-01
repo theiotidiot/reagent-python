@@ -11,10 +11,10 @@ from reagentpy.clients.composite_scores import CompositeClient
 
 
 class TimezoneVisClient(ReagentClient):
-    def __init__(self):
+    def __init__(self, local_geojson_path: str = "combined-now.json"):
         super().__init__()
         # The file that contains timezone boundaries; will be downloaded if needed
-        self.local_geojson_path = "combined-now.json"
+        self.local_geojson_path = local_geojson_path
 
 
     def get_tz_ids(self, offset: float) -> List[str]:
@@ -661,14 +661,12 @@ class TimezoneVisClient(ReagentClient):
     def read_timezone_geojson(self) -> Optional[dict]:
         """Read the large (~70MB) geojson file into an object in memory"""
 
-        geojson_path = "combined-now.json"
-
         # print(f"  Reading timezones from {geojson_path}...", end="")
-        sys.stdout.flush()
+        # sys.stdout.flush()
 
         # start = time.time()
-        geojson_data = gpd.read_file(geojson_path)
-        bounds = geojson_data.crs.area_of_use.bounds
+        geojson_data = gpd.read_file(self.local_geojson_path)
+        # bounds = geojson_data.crs.area_of_use.bounds
         # print(f"bounds: {str(bounds)}")
         # duration = time.time() - start
         # print(f"  Finished in {duration:.2f} seconds.")
