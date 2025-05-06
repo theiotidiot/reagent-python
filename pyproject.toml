@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reagentpy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python wrapper for the Reagent Analytics API."
 authors = [
     "Reagent Analytics <developers@reagantanalytics.com>"
